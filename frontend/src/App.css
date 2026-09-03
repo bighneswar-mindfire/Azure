@@ -1,0 +1,15 @@
+form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+table {
+  margin-top: 8px;
+}
+
+th {
+  background: #f0f0f0;
+  text-align: left;
+}

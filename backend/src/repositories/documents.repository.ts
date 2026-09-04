@@ -1,24 +1,82 @@
-import type { DocumentRecord } from "../types/document";
+import { pool } from "../db/pool";
+import type { DocumentRecord, ProcessingStatus } from "../types/document";
 
 export interface IDocumentsRepository {
   save(record: DocumentRecord): Promise<void>;
   findAll(): Promise<DocumentRecord[]>;
 }
 
-class InMemoryDocumentsRepository implements IDocumentsRepository {
-  private documents = new Map<string, DocumentRecord>();
+interface DocumentRow {
+  document_id: string;
+  original_file_name: string;
+  blob_name: string;
+  blob_url: string;
+  document_type: string | null;
+  measure_extracted: string | null;
+  measure_date: string | null;
+  date_processed: Date | null;
+  processed_by: string;
+  processing_status: ProcessingStatus;
+  error_message: string | null;
+  uploaded_at: Date;
+}
 
+function toRecord(row: DocumentRow): DocumentRecord {
+  return {
+    documentId: row.document_id,
+    originalFileName: row.original_file_name,
+    blobName: row.blob_name,
+    blobUrl: row.blob_url,
+    documentType: row.document_type,
+    measureExtracted: row.measure_extracted,
+    measureDate: row.measure_date,
+    dateProcessed: row.date_processed ? row.date_processed.toISOString() : null,
+    processedBy: row.processed_by,
+    processingStatus: row.processing_status,
+    errorMessage: row.error_message,
+    uploadedAt: row.uploaded_at.toISOString(),
+  };
+}
+
+class PostgresDocumentsRepository implements IDocumentsRepository {
   async save(record: DocumentRecord): Promise<void> {
-    this.documents.set(record.documentId, record);
+    await pool.query(
+      `INSERT INTO documents (
+         document_id, original_file_name, blob_name, blob_url,
+         document_type, measure_extracted, measure_date, date_processed,
+         processed_by, processing_status, error_message, uploaded_at
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+       ON CONFLICT (document_id) DO UPDATE SET
+         document_type = EXCLUDED.document_type,
+         measure_extracted = EXCLUDED.measure_extracted,
+         measure_date = EXCLUDED.measure_date,
+         date_processed = EXCLUDED.date_processed,
+         processing_status = EXCLUDED.processing_status,
+         error_message = EXCLUDED.error_message`,
+      [
+        record.documentId,
+        record.originalFileName,
+        record.blobName,
+        record.blobUrl,
+        record.documentType,
+        record.measureExtracted,
+        record.measureDate,
+        record.dateProcessed,
+        record.processedBy,
+        record.processingStatus,
+        record.errorMessage,
+        record.uploadedAt,
+      ],
+    );
   }
 
   async findAll(): Promise<DocumentRecord[]> {
-    return Array.from(this.documents.values()).sort(
-      (a, b) =>
-        new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime(),
+    const result = await pool.query<DocumentRow>(
+      "SELECT * FROM documents ORDER BY uploaded_at DESC",
     );
+    return result.rows.map(toRecord);
   }
 }
 
 export const documentsRepository: IDocumentsRepository =
-  new InMemoryDocumentsRepository();
+  new PostgresDocumentsRepository();

@@ -51,3 +51,21 @@ export async function uploadDocumentBlob(
     size: buffer.length,
   };
 }
+
+export interface DownloadedBlob {
+  buffer: Buffer;
+  contentType: string;
+}
+
+export async function downloadDocumentBlob(blobName: string): Promise<DownloadedBlob> {
+  const containerClient = await getContainerClient();
+  const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+  const buffer = await blockBlobClient.downloadToBuffer();
+  const properties = await blockBlobClient.getProperties();
+
+  return {
+    buffer,
+    contentType: properties.contentType ?? "application/octet-stream",
+  };
+}

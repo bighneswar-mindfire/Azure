@@ -29,7 +29,7 @@ function App() {
       <UploadForm onUploaded={loadDocuments} />
       <hr />
       {loadError && <p style={{ color: "red" }}>{loadError}</p>}
-      <DocumentsTable documents={documents} />
+      <DocumentsTable documents={documents} onRetried={loadDocuments} />
     </div>
   );
 }

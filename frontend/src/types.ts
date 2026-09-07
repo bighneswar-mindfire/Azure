@@ -1,5 +1,7 @@
 export type ProcessingStatus = "Uploaded" | "Success" | "Needs Review" | "Failed";
 
+export type ConfidenceLabel = "High" | "Medium" | "Low";
+
 export interface DocumentRecord {
   documentId: string;
   originalFileName: string;
@@ -13,4 +15,6 @@ export interface DocumentRecord {
   processingStatus: ProcessingStatus;
   errorMessage: string | null;
   uploadedAt: string;
+  confidenceScore: number | null;
+  confidenceLabel: ConfidenceLabel | null;
 }

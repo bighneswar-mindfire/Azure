@@ -4,6 +4,7 @@ import type { ConfidenceLabel, DocumentRecord, ProcessingStatus } from "../types
 export interface IDocumentsRepository {
   save(record: DocumentRecord): Promise<void>;
   findAll(): Promise<DocumentRecord[]>;
+  findById(documentId: string): Promise<DocumentRecord | undefined>;
 }
 
 interface DocumentRow {
@@ -84,6 +85,14 @@ class PostgresDocumentsRepository implements IDocumentsRepository {
       "SELECT * FROM documents ORDER BY uploaded_at DESC",
     );
     return result.rows.map(toRecord);
+  }
+
+  async findById(documentId: string): Promise<DocumentRecord | undefined> {
+    const result = await pool.query<DocumentRow>(
+      "SELECT * FROM documents WHERE document_id = $1",
+      [documentId],
+    );
+    return result.rows[0] ? toRecord(result.rows[0]) : undefined;
   }
 }
 

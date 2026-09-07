@@ -20,3 +20,14 @@ export async function uploadDocument(file: File): Promise<void> {
     throw err;
   }
 }
+
+export async function retryDocument(documentId: string): Promise<void> {
+  try {
+    await httpClient.post(`/documents/${documentId}/retry`);
+  } catch (err) {
+    if (axios.isAxiosError(err)) {
+      throw new Error(err.response?.data?.error ?? `Retry failed (${err.response?.status})`);
+    }
+    throw err;
+  }
+}

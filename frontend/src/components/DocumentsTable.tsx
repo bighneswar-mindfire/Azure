@@ -1,10 +1,25 @@
+import { useState } from "react";
+import { retryDocument } from "../api";
 import type { DocumentRecord } from "../types";
 
 interface DocumentsTableProps {
   documents: DocumentRecord[];
+  onRetried: () => void;
 }
 
-export function DocumentsTable({ documents }: DocumentsTableProps) {
+export function DocumentsTable({ documents, onRetried }: DocumentsTableProps) {
+  const [retryingId, setRetryingId] = useState<string | null>(null);
+
+  async function handleRetry(documentId: string) {
+    setRetryingId(documentId);
+    try {
+      await retryDocument(documentId);
+      onRetried();
+    } finally {
+      setRetryingId(null);
+    }
+  }
+
   return (
     <div>
       <h2>Processed Documents</h2>
@@ -21,6 +36,8 @@ export function DocumentsTable({ documents }: DocumentsTableProps) {
               <th>Measure Date</th>
               <th>Date Processed</th>
               <th>Status</th>
+              <th>Confidence</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -32,7 +49,13 @@ export function DocumentsTable({ documents }: DocumentsTableProps) {
                 <td>{doc.measureExtracted ?? "-"}</td>
                 <td>{doc.measureDate ?? "-"}</td>
                 <td>{doc.dateProcessed ?? "-"}</td>
-                <td>{doc.processingStatus}</td>
+                <td title={doc.errorMessage ?? undefined}>{doc.processingStatus}</td>
+                <td>{doc.confidenceLabel ? `${doc.confidenceLabel} (${doc.confidenceScore})` : "-"}</td>
+                <td>
+                  <button onClick={() => handleRetry(doc.documentId)} disabled={retryingId === doc.documentId}>
+                    {retryingId === doc.documentId ? "Retrying..." : "Retry"}
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>

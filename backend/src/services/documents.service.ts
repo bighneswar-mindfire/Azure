@@ -1,11 +1,16 @@
 import { randomUUID } from "crypto";
 import path from "path";
 import { uploadDocumentBlob } from "./blobStorage.service";
+import { processDocument } from "./processing.service";
 import { documentsRepository } from "../repositories/documents.repository";
 import type { DocumentRecord } from "../types/document";
 
 export async function listDocuments(): Promise<DocumentRecord[]> {
   return documentsRepository.findAll();
+}
+
+export async function retryDocument(documentId: string): Promise<DocumentRecord> {
+  return processDocument(documentId);
 }
 
 export async function uploadDocument(file: Express.Multer.File): Promise<DocumentRecord> {
@@ -33,5 +38,5 @@ export async function uploadDocument(file: Express.Multer.File): Promise<Documen
   };
 
   await documentsRepository.save(record);
-  return record;
+  return processDocument(documentId);
 }

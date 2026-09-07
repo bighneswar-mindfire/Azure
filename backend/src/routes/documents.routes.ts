@@ -6,5 +6,6 @@ const router = Router();
 
 router.get("/", documentsController.listDocuments);
 router.post("/upload", uploadSingleDocument, documentsController.uploadDocument);
+router.post("/:id/retry", documentsController.retryDocument);
 
 export default router;

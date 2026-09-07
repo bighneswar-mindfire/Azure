@@ -14,14 +14,19 @@ export async function uploadDocument(req: Request, res: Response): Promise<void>
 
   try {
     const record = await documentsService.uploadDocument(req.file);
-    res.status(201).json({
-      documentId: record.documentId,
-      fileName: record.originalFileName,
-      blobUrl: record.blobUrl,
-      status: record.processingStatus,
-    });
+    res.status(201).json(record);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error uploading document";
     res.status(500).json({ error: message });
+  }
+}
+
+export async function retryDocument(req: Request, res: Response): Promise<void> {
+  try {
+    const record = await documentsService.retryDocument(req.params.id);
+    res.json(record);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error retrying document";
+    res.status(404).json({ error: message });
   }
 }

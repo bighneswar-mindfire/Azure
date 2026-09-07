@@ -28,6 +28,8 @@ export async function uploadDocument(file: Express.Multer.File): Promise<Documen
     processingStatus: "Uploaded",
     errorMessage: null,
     uploadedAt: new Date().toISOString(),
+    confidenceScore: null,
+    confidenceLabel: null,
   };
 
   await documentsRepository.save(record);

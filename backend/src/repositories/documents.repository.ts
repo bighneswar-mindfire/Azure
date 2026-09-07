@@ -1,5 +1,5 @@
 import { pool } from "../db/pool";
-import type { DocumentRecord, ProcessingStatus } from "../types/document";
+import type { ConfidenceLabel, DocumentRecord, ProcessingStatus } from "../types/document";
 
 export interface IDocumentsRepository {
   save(record: DocumentRecord): Promise<void>;
@@ -19,6 +19,8 @@ interface DocumentRow {
   processing_status: ProcessingStatus;
   error_message: string | null;
   uploaded_at: Date;
+  confidence_score: number | null;
+  confidence_label: ConfidenceLabel | null;
 }
 
 function toRecord(row: DocumentRow): DocumentRecord {
@@ -35,6 +37,8 @@ function toRecord(row: DocumentRow): DocumentRecord {
     processingStatus: row.processing_status,
     errorMessage: row.error_message,
     uploadedAt: row.uploaded_at.toISOString(),
+    confidenceScore: row.confidence_score,
+    confidenceLabel: row.confidence_label,
   };
 }
 
@@ -44,15 +48,18 @@ class PostgresDocumentsRepository implements IDocumentsRepository {
       `INSERT INTO documents (
          document_id, original_file_name, blob_name, blob_url,
          document_type, measure_extracted, measure_date, date_processed,
-         processed_by, processing_status, error_message, uploaded_at
-       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+         processed_by, processing_status, error_message, uploaded_at,
+         confidence_score, confidence_label
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
        ON CONFLICT (document_id) DO UPDATE SET
          document_type = EXCLUDED.document_type,
          measure_extracted = EXCLUDED.measure_extracted,
          measure_date = EXCLUDED.measure_date,
          date_processed = EXCLUDED.date_processed,
          processing_status = EXCLUDED.processing_status,
-         error_message = EXCLUDED.error_message`,
+         error_message = EXCLUDED.error_message,
+         confidence_score = EXCLUDED.confidence_score,
+         confidence_label = EXCLUDED.confidence_label`,
       [
         record.documentId,
         record.originalFileName,
@@ -66,6 +73,8 @@ class PostgresDocumentsRepository implements IDocumentsRepository {
         record.processingStatus,
         record.errorMessage,
         record.uploadedAt,
+        record.confidenceScore,
+        record.confidenceLabel,
       ],
     );
   }

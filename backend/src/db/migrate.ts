@@ -13,8 +13,13 @@ const SCHEMA_SQL = `
     processed_by TEXT NOT NULL,
     processing_status TEXT NOT NULL CHECK (processing_status IN ('Uploaded', 'Success', 'Needs Review', 'Failed')),
     error_message TEXT,
-    uploaded_at TIMESTAMPTZ NOT NULL
+    uploaded_at TIMESTAMPTZ NOT NULL,
+    confidence_score INTEGER,
+    confidence_label TEXT
   );
+
+  ALTER TABLE documents ADD COLUMN IF NOT EXISTS confidence_score INTEGER;
+  ALTER TABLE documents ADD COLUMN IF NOT EXISTS confidence_label TEXT;
 `;
 
 export async function runMigrations(): Promise<void> {

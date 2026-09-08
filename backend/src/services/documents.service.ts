@@ -9,7 +9,9 @@ export async function listDocuments(): Promise<DocumentRecord[]> {
   return documentsRepository.findAll();
 }
 
-async function triggerProcessingOrMarkFailed(record: DocumentRecord): Promise<DocumentRecord> {
+async function triggerProcessingOrMarkFailed(
+  record: DocumentRecord,
+): Promise<DocumentRecord> {
   try {
     return await triggerProcessing(record.documentId);
   } catch (err) {
@@ -17,14 +19,19 @@ async function triggerProcessingOrMarkFailed(record: DocumentRecord): Promise<Do
       ...record,
       dateProcessed: new Date().toISOString(),
       processingStatus: "Failed",
-      errorMessage: err instanceof Error ? err.message : "Could not reach the processing function",
+      errorMessage:
+        err instanceof Error
+          ? err.message
+          : "Could not reach the processing function",
     };
     await documentsRepository.save(failed);
     return failed;
   }
 }
 
-export async function retryDocument(documentId: string): Promise<DocumentRecord> {
+export async function retryDocument(
+  documentId: string,
+): Promise<DocumentRecord> {
   const record = await documentsRepository.findById(documentId);
   if (!record) {
     throw new Error(`Document ${documentId} not found`);
@@ -32,7 +39,9 @@ export async function retryDocument(documentId: string): Promise<DocumentRecord>
   return triggerProcessingOrMarkFailed(record);
 }
 
-export async function uploadDocument(file: Express.Multer.File): Promise<DocumentRecord> {
+export async function uploadDocument(
+  file: Express.Multer.File,
+): Promise<DocumentRecord> {
   const documentId = randomUUID();
   const extension = path.extname(file.originalname);
   const blobName = `${documentId}${extension}`;
@@ -57,5 +66,5 @@ export async function uploadDocument(file: Express.Multer.File): Promise<Documen
   };
 
   await documentsRepository.save(record);
-  return triggerProcessingOrMarkFailed(record);
+  return record;
 }

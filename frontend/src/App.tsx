@@ -15,12 +15,16 @@ function App() {
       setDocuments(docs);
       setLoadError(null);
     } catch (err) {
-      setLoadError(err instanceof Error ? err.message : "Failed to load documents");
+      setLoadError(
+        err instanceof Error ? err.message : "Failed to load documents",
+      );
     }
   }, []);
 
   useEffect(() => {
     loadDocuments();
+    const intervalId = setInterval(loadDocuments, 5000);
+    return () => clearInterval(intervalId);
   }, [loadDocuments]);
 
   return (

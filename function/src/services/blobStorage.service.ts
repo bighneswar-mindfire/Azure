@@ -25,29 +25,20 @@ function getContainerClient(): Promise<ContainerClient> {
   return containerClientPromise;
 }
 
-export interface UploadedBlob {
-  blobName: string;
-  url: string;
+export interface DownloadedBlob {
+  buffer: Buffer;
   contentType: string;
-  size: number;
 }
 
-export async function uploadDocumentBlob(
-  blobName: string,
-  buffer: Buffer,
-  contentType: string,
-): Promise<UploadedBlob> {
+export async function downloadDocumentBlob(blobName: string): Promise<DownloadedBlob> {
   const containerClient = await getContainerClient();
   const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
-  await blockBlobClient.uploadData(buffer, {
-    blobHTTPHeaders: { blobContentType: contentType },
-  });
+  const buffer = await blockBlobClient.downloadToBuffer();
+  const properties = await blockBlobClient.getProperties();
 
   return {
-    blobName,
-    url: blockBlobClient.url,
-    contentType,
-    size: buffer.length,
+    buffer,
+    contentType: properties.contentType ?? "application/octet-stream",
   };
 }

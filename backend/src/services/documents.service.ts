@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import path from "path";
 import { uploadDocumentBlob } from "./blobStorage.service";
-import { processDocument } from "./processing.service";
+import { triggerProcessing } from "./processingFunction.client";
 import { documentsRepository } from "../repositories/documents.repository";
 import type { DocumentRecord } from "../types/document";
 
@@ -9,8 +9,27 @@ export async function listDocuments(): Promise<DocumentRecord[]> {
   return documentsRepository.findAll();
 }
 
+async function triggerProcessingOrMarkFailed(record: DocumentRecord): Promise<DocumentRecord> {
+  try {
+    return await triggerProcessing(record.documentId);
+  } catch (err) {
+    const failed: DocumentRecord = {
+      ...record,
+      dateProcessed: new Date().toISOString(),
+      processingStatus: "Failed",
+      errorMessage: err instanceof Error ? err.message : "Could not reach the processing function",
+    };
+    await documentsRepository.save(failed);
+    return failed;
+  }
+}
+
 export async function retryDocument(documentId: string): Promise<DocumentRecord> {
-  return processDocument(documentId);
+  const record = await documentsRepository.findById(documentId);
+  if (!record) {
+    throw new Error(`Document ${documentId} not found`);
+  }
+  return triggerProcessingOrMarkFailed(record);
 }
 
 export async function uploadDocument(file: Express.Multer.File): Promise<DocumentRecord> {
@@ -38,5 +57,5 @@ export async function uploadDocument(file: Express.Multer.File): Promise<Documen
   };
 
   await documentsRepository.save(record);
-  return processDocument(documentId);
+  return triggerProcessingOrMarkFailed(record);
 }

@@ -6,7 +6,8 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && npm run copy-frontend",
+    "copy-frontend": "node scripts/copy-frontend.js",
     "start": "node dist/index.js"
   },
   "dependencies": {

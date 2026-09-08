@@ -1,0 +1,95 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: "ubuntu-latest"
+
+variables:
+  webAppName: "clinicworks-app"
+  functionAppName: "clinicworks-processor"
+  azureServiceConnection: "clinicworks-azure-connection"
+
+stages:
+  - stage: BuildAndDeployWebApp
+    displayName: "Build and deploy Web App (frontend + backend)"
+    jobs:
+      - job: BuildWebApp
+        displayName: "Build"
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: "20.x"
+            displayName: "Install Node.js"
+
+          - script: |
+              npm ci
+              npm run build
+            workingDirectory: frontend
+            displayName: "Build frontend"
+
+          - script: |
+              npm ci
+              npm run build
+            workingDirectory: backend
+            displayName: "Build backend (also copies frontend build into backend/public)"
+
+          - script: |
+              npm ci --omit=dev
+            workingDirectory: backend
+            displayName: "Install backend production dependencies"
+
+          - task: ArchiveFiles@2
+            inputs:
+              rootFolderOrFile: "backend"
+              includeRootFolder: false
+              archiveType: "zip"
+              archiveFile: "$(Build.ArtifactStagingDirectory)/webapp.zip"
+            displayName: "Zip backend (dist, public, node_modules, package.json)"
+
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: "$(azureServiceConnection)"
+              appType: "webAppLinux"
+              appName: "$(webAppName)"
+              package: "$(Build.ArtifactStagingDirectory)/webapp.zip"
+            displayName: "Deploy to Azure Web App"
+
+  - stage: BuildAndDeployFunction
+    displayName: "Build and deploy Azure Function"
+    jobs:
+      - job: BuildFunction
+        displayName: "Build"
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: "20.x"
+            displayName: "Install Node.js"
+
+          - script: |
+              npm ci
+              npm run build
+            workingDirectory: function
+            displayName: "Build function"
+
+          - script: |
+              npm ci --omit=dev
+            workingDirectory: function
+            displayName: "Install function production dependencies"
+
+          - task: ArchiveFiles@2
+            inputs:
+              rootFolderOrFile: "function"
+              includeRootFolder: false
+              archiveType: "zip"
+              archiveFile: "$(Build.ArtifactStagingDirectory)/function.zip"
+            displayName: "Zip function (dist, node_modules, package.json, host.json)"
+
+          - task: AzureFunctionApp@2
+            inputs:
+              azureSubscription: "$(azureServiceConnection)"
+              appType: "functionApp"
+              appName: "$(functionAppName)"
+              package: "$(Build.ArtifactStagingDirectory)/function.zip"
+            displayName: "Deploy to Azure Function App"

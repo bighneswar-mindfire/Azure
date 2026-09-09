@@ -9,6 +9,7 @@
     "AZURE_DOC_INTEL_ENDPOINT": "https://your-resource.cognitiveservices.azure.com/",
     "AZURE_DOC_INTEL_KEY": "your-key-here",
     "GEMINI_API_KEY": "your-key-here",
-    "GEMINI_MODEL": "gemini-3.6-flash"
+    "GEMINI_MODEL": "gemini-3.6-flash",
+    "APPLICATIONINSIGHTS_CONNECTION_STRING": ""
   }
 }

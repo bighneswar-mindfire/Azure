@@ -4,6 +4,7 @@ import { extractRawMeasures } from "./extraction.service";
 import { applyBusinessRules } from "./businessRules.service";
 import { computeConfidenceScore } from "./confidenceScoring.service";
 import { documentsRepository } from "../repositories/documents.repository";
+import { trackDocumentProcessingFailed } from "../telemetry";
 import type { DocumentRecord } from "../types/document";
 
 export async function processDocument(
@@ -38,15 +39,16 @@ export async function processDocument(
     await documentsRepository.save(processed);
     return processed;
   } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : "Unknown processing error";
     const failed: DocumentRecord = {
       ...existing,
       dateProcessed: new Date().toISOString(),
       processingStatus: "Failed",
-      errorMessage:
-        err instanceof Error ? err.message : "Unknown processing error",
+      errorMessage,
     };
 
     await documentsRepository.save(failed);
+    trackDocumentProcessingFailed(documentId, errorMessage);
     return failed;
   }
 }

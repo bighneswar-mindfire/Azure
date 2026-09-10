@@ -31,18 +31,20 @@ export function UploadForm({ onUploaded }: UploadFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <div className="card">
       <h2>Upload Document</h2>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff"
-        onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
-      />
-      <button type="submit" disabled={!selectedFile || status === "uploading"}>
-        {status === "uploading" ? "Submitting..." : "Submit for Processing"}
-      </button>
-      {status === "error" && <p style={{ color: "red" }}>{errorMessage}</p>}
-    </form>
+      <form className="upload-form" onSubmit={handleSubmit}>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff"
+          onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
+        />
+        <button type="submit" className="btn-primary" disabled={!selectedFile || status === "uploading"}>
+          {status === "uploading" ? "Submitting…" : "Submit for Processing"}
+        </button>
+      </form>
+      {status === "error" && <p className="error-text" style={{ marginTop: 10 }}>{errorMessage}</p>}
+    </div>
   );
 }

@@ -28,11 +28,18 @@ function App() {
   }, [loadDocuments]);
 
   return (
-    <div style={{ maxWidth: 900, margin: "0 auto", padding: "1rem" }}>
-      <h1>ClinicWorks Document Processing</h1>
+    <div className="app-shell">
+      <header className="app-header">
+        <span className="dot" />
+        <h1>ClinicWorks Document Processing</h1>
+      </header>
+
       <UploadForm onUploaded={loadDocuments} />
-      <hr />
-      {loadError && <p style={{ color: "red" }}>{loadError}</p>}
+      {loadError && (
+        <p className="error-text" style={{ marginBottom: 16 }}>
+          {loadError}
+        </p>
+      )}
       <DocumentsTable documents={documents} onRetried={loadDocuments} />
     </div>
   );

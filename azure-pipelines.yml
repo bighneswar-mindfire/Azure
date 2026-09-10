@@ -7,7 +7,7 @@ pool:
   vmImage: "ubuntu-latest"
 
 variables:
-  webAppName: "clinicworks-app"
+  webAppName: "clinicworks-webapp2"
   functionAppName: "clinicworks-processor"
   azureServiceConnection: "clinicworks-azure-connection"
 

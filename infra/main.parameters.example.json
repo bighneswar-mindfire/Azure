@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": { "value": "eastus" },
+    "postgresLocation": { "value": "eastus2" },
+    "functionLocation": { "value": "centralus" },
+    "webAppLocation": { "value": "centralindia" },
+    "storageAccountName": { "value": "clinicdatastorageXX" },
+    "postgresServerName": { "value": "clinicdata-db" },
+    "postgresAdminUsername": { "value": "clinicadmin" },
+    "postgresAdminPassword": { "value": "REPLACE_ME" },
+    "docIntelName": { "value": "clinicworks-doc-intel" },
+    "appInsightsName": { "value": "clinicworks-app-insights" },
+    "keyVaultName": { "value": "clinicworks-vaultXX" },
+    "functionAppName": { "value": "clinicworks-processor" },
+    "webAppName": { "value": "clinicworks-webapp" },
+    "docIntelKey": { "value": "REPLACE_ME" },
+    "geminiApiKey": { "value": "REPLACE_ME" },
+    "alertEmail": { "value": "you@example.com" }
+  }
+}

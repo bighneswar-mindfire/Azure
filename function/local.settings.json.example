@@ -10,6 +10,7 @@
     "AZURE_DOC_INTEL_KEY": "your-key-here",
     "GEMINI_API_KEY": "your-key-here",
     "GEMINI_MODEL": "gemini-3.6-flash",
-    "APPLICATIONINSIGHTS_CONNECTION_STRING": ""
+    "APPLICATIONINSIGHTS_CONNECTION_STRING": "",
+    "NEEDS_REVIEW_NOTIFICATION_URL": "https://prod-00.region.logic.azure.com:443/workflows/.../triggers/When_a_HTTP_request_is_received/paths/invoke?..."
   }
 }

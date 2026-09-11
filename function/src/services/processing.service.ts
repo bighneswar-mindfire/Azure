@@ -4,6 +4,7 @@ import { extractRawMeasures } from "./extraction.service";
 import { applyBusinessRules } from "./businessRules.service";
 import { computeConfidenceScore } from "./confidenceScoring.service";
 import { documentsRepository } from "../repositories/documents.repository";
+import { notifyNeedsReview } from "./notification.service";
 import { trackDocumentProcessingFailed } from "../telemetry";
 import type { DocumentRecord } from "../types/document";
 
@@ -37,6 +38,11 @@ export async function processDocument(
     };
 
     await documentsRepository.save(processed);
+
+    if (ruleResult.needsReview) {
+      await notifyNeedsReview(documentId, existing.originalFileName, ruleResult.reviewReason);
+    }
+
     return processed;
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : "Unknown processing error";

@@ -3,3 +3,4 @@ dist/
 backend/public/
 .env
 *.log
+infra/main.parameters.json
